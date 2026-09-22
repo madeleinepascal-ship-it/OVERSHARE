@@ -1,0 +1,14 @@
+{
+  "name": "overshare",
+  "version": "0.1.0",
+  "private": true,
+  "description": "You shared all year, now overshare. Turn a year of posts into donations to the causes behind them.",
+  "type": "module",
+  "scripts": {
+    "start": "node scripts/serve.js",
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Overshare</title>
+    <meta name="description" content="You shared all year, now overshare. See how all your social can make an impact." />
+    <meta name="theme-color" content="#ff3d7f" />
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💞</text></svg>" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="wordmark" href="./" aria-label="Overshare home">over<span>share</span></a>
+      <button class="link-btn" id="restart" hidden>Start over</button>
+    </header>
+
+    <main>
+      <!-- 1. Landing -->
+      <section class="screen hero" id="screen-start">
+        <p class="eyebrow">Make a real social impact.</p>
+        <h1>You shared all year, <em>now overshare.</em></h1>
+        <p class="lede">All your social can make an impact. The brunches, the gigs, the park days — we turn your year into the causes right behind them, right where you spent it.</p>
+
+        <div class="start-card">
+          <h2>See how all your social can make an impact.</h2>
+          <p>Share your insta and we’ll show you how easy it is to share.</p>
+
+          <form id="handle-form" class="handle-form" autocomplete="off">
+            <label class="visually-hidden" for="handle">Instagram handle</label>
+            <div class="handle-input">
+              <span aria-hidden="true">@</span>
+              <input id="handle" name="handle" placeholder="yourhandle" spellcheck="false" autocapitalize="off" required />
+            </div>
+            <button class="btn btn-primary" type="submit">Overshare →</button>
+          </form>
+
+          <div class="divider"><span>or, for your real year</span></div>
+
+          <label class="dropzone" id="dropzone">
+            <input type="file" id="file-input" accept=".zip,.json,application/zip,application/json" multiple />
+            <strong>Drop your Instagram export</strong>
+            <span>.zip or .json — read right here in your browser, never uploaded.</span>
+          </label>
+          <p class="error" id="file-error" role="alert" hidden></p>
+
+          <details class="how">
+            <summary>How do I get my export?</summary>
+            <ol>
+              <li>In Instagram, open <b>Settings → Accounts Center → Your information and permissions</b>.</li>
+              <li>Tap <b>Download your information</b> and choose your Instagram account.</li>
+              <li>Pick <b>Some of your information → Content</b> (posts, stories, reels), format <b>JSON</b>, date range <b>Last year</b>.</li>
+              <li>When Instagram emails you, download the .zip and drop it here.</li>
+            </ol>
+            <p>We only open the files that describe your own posts. Messages, followers and everything else in the export are ignored.</p>
+          </details>
+        </div>
+
+        <ul class="how-it-works">
+          <li><span>1</span><b>We scrub your grid.</b> Captions, hashtags and photo locations tell us where you ate, drank, danced and wandered.</li>
+          <li><span>2</span><b>We match your hoods.</b> Lots of ramen in Williamsburg? Here are the food charities working right there.</li>
+          <li><span>3</span><b>You overshare.</b> Pick your causes, set a budget, give directly — every dollar goes straight to the charity.</li>
+        </ul>
+      </section>
+
+      <!-- 2. Scanning -->
+      <section class="screen scanning" id="screen-scan" hidden>
+        <div class="scan-orb" aria-hidden="true"></div>
+        <p class="scan-count" id="scan-count">0</p>
+        <p class="scan-line" id="scan-line" aria-live="polite">Scrubbing your grid…</p>
+      </section>
+
+      <!-- 3. Results -->
+      <section class="screen results" id="screen-results" hidden>
+        <div class="preview-banner" id="preview-banner" hidden>
+          <b>This is a preview.</b> We can’t read Instagram without your say-so, so this year is a sample built for <span id="preview-handle"></span>.
+          <button class="link-btn" id="preview-upload">Drop your export for the real thing →</button>
+        </div>
+
+        <header class="results-head">
+          <p class="eyebrow" id="range"></p>
+          <h1 id="results-title">Your year, overshared.</h1>
+        </header>
+
+        <div class="stats" id="stats"></div>
+
+        <section class="year-bars">
+          <h2>What your grid says you did</h2>
+          <ol id="bars"></ol>
+        </section>
+
+        <section class="picks">
+          <div class="picks-head">
+            <div>
+              <h2>All your social can make an impact.</h2>
+              <p>Causes that match what you did, where you did it. We’ve picked a few — add or swap as you like.</p>
+            </div>
+            <label class="city-select">Giving in
+              <select id="city"></select>
+            </label>
+          </div>
+          <div id="picks"></div>
+          <p class="fineprint">Overshare isn’t affiliated with these organisations and never touches your money — you donate on each charity’s own site. Details change, so check before you give.</p>
+        </section>
+      </section>
+
+      <!-- 4. Give -->
+      <section class="screen give" id="screen-give" hidden>
+        <header class="results-head">
+          <p class="eyebrow">Almost overshared</p>
+          <h1>Now share it where it counts.</h1>
+          <p class="lede">Each link opens the charity’s own donation page. Tick them off as you go.</p>
+        </header>
+        <ol class="give-list" id="give-list"></ol>
+        <p class="give-progress" id="give-progress"></p>
+
+        <section class="share">
+          <h2>Then overshare that you overshared.</h2>
+          <canvas id="share-canvas" width="1080" height="1350" aria-label="Your Overshare card"></canvas>
+          <div class="share-actions">
+            <button class="btn btn-primary" id="share-btn">Share your card</button>
+            <button class="btn" id="download-btn">Download</button>
+            <button class="btn" id="copy-btn">Copy caption</button>
+          </div>
+          <p class="share-caption" id="share-caption"></p>
+        </section>
+        <button class="link-btn back" id="back-to-picks">← Change my picks</button>
+      </section>
+    </main>
+
+    <!-- Basket: visible on the results screen -->
+    <aside class="basket" id="basket" hidden aria-label="Your overshare">
+      <div class="basket-inner">
+        <div class="basket-row">
+          <span class="basket-label">Budget</span>
+          <div class="chips" id="budget-chips"></div>
+        </div>
+        <div class="basket-row">
+          <span class="basket-label">Split</span>
+          <div class="chips" id="split-chips"></div>
+        </div>
+        <ul class="basket-lines" id="basket-lines"></ul>
+        <button class="btn btn-primary btn-wide" id="checkout" disabled>Overshare</button>
+      </div>
+    </aside>
+
+    <script type="module" src="src/app.js"></script>
+  </body>
+</html>
