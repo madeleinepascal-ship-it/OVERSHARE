@@ -3,7 +3,7 @@ import { test } from 'node:test';
 
 import { CHARITIES } from '../src/data/charities.js';
 import { CATEGORY_BY_ID } from '../src/data/categories.js';
-import { CITY_BY_ID, HOOD_BY_ID } from '../src/data/places.js';
+import { BOROUGH_BY_ID, HOOD_BY_ID, HOODS } from '../src/data/places.js';
 import { analyzeYear, readPost } from '../src/engine/classify.js';
 import { demoPosts } from '../src/engine/demo.js';
 import { allocate, recommend } from '../src/engine/match.js';
@@ -46,7 +46,7 @@ test('reads posts, stories and GPS from an export, and skips non-content files',
       creation_timestamp: 1767225600,
       media: [
         { uri: 'a.jpg', creation_timestamp: 1767225600, title: '' },
-        { uri: 'b.jpg', creation_timestamp: 1767225600, title: '', media_metadata: { photo_metadata: { exif_data: [{ latitude: 51.5265, longitude: -0.0786 }] } } },
+        { uri: 'b.jpg', creation_timestamp: 1767225600, title: '', media_metadata: { photo_metadata: { exif_data: [{ latitude: 40.7081, longitude: -73.9571 }] } } },
       ],
     },
     { media: [{ uri: 'c.jpg', creation_timestamp: 1767312000, title: 'Gig night #livemusic' }] },
@@ -60,7 +60,7 @@ test('reads posts, stories and GPS from an export, and skips non-content files',
     { name: 'broken.json', text: '{nope' },
   ]);
   assert.deepEqual(parsed.map((p) => p.caption), ['Brunch in Williamsburg 🥞', 'Gig night #livemusic', 'coffee first']);
-  assert.equal(parsed[0].lat, 51.5265);
+  assert.equal(parsed[0].lat, 40.7081);
 
   assert.ok(isContentFile('your_instagram_activity/content/posts_1.json'));
   assert.ok(isContentFile('content/stories.json'));
@@ -74,25 +74,29 @@ test('lastYear keeps the twelve months up to the newest post', () => {
 });
 
 test('classifies activities and places from captions', () => {
-  const read = readPost({ caption: 'Negroni and dumplings in Greenpoint #nycfoodie', timestamp: at(0) });
+  const read = readPost({ caption: 'Negroni and dumplings in Greenpoint', timestamp: at(0) });
   assert.deepEqual(read.categories.sort(), ['drinks', 'food']);
-  assert.deepEqual(read.cities, ['nyc']);
-  assert.equal(read.hoodCandidates[0].id, 'greenpoint');
+  assert.equal(read.hoodId, 'greenpoint');
+  assert.equal(read.boroughId, 'brooklyn');
+  assert.equal(read.inNyc, true);
 });
 
-test('ambiguous neighbourhoods resolve to your home city', () => {
-  const summary = analyzeYear(
-    posts('Pints in Peckham', 'Brixton brunch', 'Dinner in Soho', 'london london london', 'gig in Dalston'),
+test('borough and city mentions place a post without a neighborhood', () => {
+  assert.deepEqual(
+    [readPost({ caption: 'Bronx bound #bronxeats', timestamp: 0 })].map((r) => [r.inNyc, r.hoodId, r.boroughId]),
+    [[true, null, 'bronx']],
   );
-  assert.equal(summary.homeCityId, 'london');
-  const food = summary.categories.find((c) => c.id === 'food');
-  assert.deepEqual(food.hoods.map((h) => h.id).sort(), ['brixton', 'soho-london']);
+  const nyc = readPost({ caption: 'best bagel #nycfood', timestamp: 0 });
+  assert.deepEqual([nyc.inNyc, nyc.boroughId], [true, null]);
+  const away = readPost({ caption: 'pasta in Rome', timestamp: 0 });
+  assert.equal(away.inNyc, false);
 });
 
-test('photo GPS places a post in the nearest neighbourhood', () => {
-  const summary = analyzeYear([{ caption: 'ramen', timestamp: at(0), lat: 40.7085, lng: -73.958 }]);
-  assert.equal(summary.homeCityId, 'nyc');
-  assert.deepEqual(summary.categories[0].hoods, [{ id: 'williamsburg', count: 1 }]);
+test('photo GPS wins over the caption', () => {
+  const wburg = readPost({ caption: 'ramen', timestamp: 0, lat: 40.7085, lng: -73.958 });
+  assert.deepEqual([wburg.hoodId, wburg.boroughId, wburg.inNyc], ['williamsburg', 'brooklyn', true]);
+  const lisbon = readPost({ caption: 'missing Williamsburg', timestamp: 0, lat: 38.72, lng: -9.14 });
+  assert.deepEqual([lisbon.hoodId, lisbon.inNyc], [null, false]);
 });
 
 test('January posts count toward the busiest month', () => {
@@ -100,19 +104,26 @@ test('January posts count toward the busiest month', () => {
   assert.equal(summary.busiestMonth, 0);
 });
 
-test('neighbourhood charities outrank city, national and global ones', () => {
+test('neighborhood charities outrank borough, city, national and global ones', () => {
   const summary = analyzeYear(posts('Picnic in Prospect Park', 'Park Slope sunset', 'Hike upstate', 'brooklyn'));
   const outdoors = recommend(summary).find((r) => r.category.id === 'outdoors');
   assert.equal(outdoors.charities[0].id, 'prospect-park-alliance');
+  assert.equal(outdoors.charities[0].local, 'hood');
   assert.match(outdoors.charities[0].reason, /2 of your days outside were in (Park Slope|Prospect Heights)/);
-  assert.ok(outdoors.charities.every((c) => c.city === undefined || c.city === 'nyc'));
 });
 
-test('never recommends another country’s national charities', () => {
-  const summary = analyzeYear(posts('Pints in Peckham', 'London pub crawl', 'cocktails in Hackney'));
-  const drinks = recommend(summary).find((r) => r.category.id === 'drinks');
-  assert.ok(drinks.charities.length > 0);
-  assert.ok(drinks.charities.every((c) => c.country === 'UK'));
+test('borough charities beat citywide ones when you were in that borough', () => {
+  const summary = analyzeYear(posts('Book club in the Bronx', 'reading #bronx', 'new books from the library'));
+  const books = recommend(summary).find((r) => r.category.id === 'books');
+  assert.equal(books.charities[0].id, 'nypl');
+  assert.match(books.charities[0].reason, /2 of your reads were in the Bronx/);
+});
+
+test('citywide charities count your NYC posts', () => {
+  const summary = analyzeYear(posts('dinner in Astoria', 'lunch downtown #nyc', 'pizza in Rome'));
+  const food = recommend(summary).find((r) => r.category.id === 'food');
+  const cityHarvest = food.charities.find((c) => c.id === 'city-harvest');
+  assert.equal(cityHarvest.reason, '2 of your meals out were in NYC');
 });
 
 test('allocate always adds up to the total', () => {
@@ -123,11 +134,23 @@ test('allocate always adds up to the total', () => {
   assert.deepEqual(allocate(0, [{ weight: 1 }]).map((s) => s.amount), [0]);
 });
 
-test('demo years are deterministic and land in one city', () => {
+test('demo years are deterministic and centered on one borough', () => {
   const a = demoPosts('@maddie', { now: at(365) });
   const b = demoPosts('maddie', { now: at(365) });
   assert.deepEqual(a, b);
-  assert.equal(analyzeYear(a.posts).homeCityId, a.cityId);
+  const summary = analyzeYear(a.posts);
+  assert.equal(summary.boroughs[0].id, a.homeBorough);
+  assert.ok(summary.nycPosts > summary.totalPosts / 3);
+});
+
+test('place data is consistent', () => {
+  const ids = new Set();
+  for (const h of HOODS) {
+    assert.ok(!ids.has(h.id), `duplicate hood ${h.id}`);
+    ids.add(h.id);
+    assert.ok(BOROUGH_BY_ID[h.borough], `${h.id}: unknown borough`);
+    assert.ok(h.lat > 40.4 && h.lat < 41 && h.lng > -74.3 && h.lng < -73.6, `${h.id}: outside NYC`);
+  }
 });
 
 test('charity data is consistent', () => {
@@ -137,11 +160,19 @@ test('charity data is consistent', () => {
     ids.add(c.id);
     assert.ok(CATEGORY_BY_ID[c.category], `${c.id}: unknown category`);
     assert.match(c.url, /^https:\/\//, `${c.id}: url must be https`);
-    if (c.scope === 'city' || c.scope === 'hood') assert.ok(CITY_BY_ID[c.city], `${c.id}: unknown city`);
-    if (c.scope === 'hood') {
-      for (const h of c.hoods) assert.equal(HOOD_BY_ID[h]?.cityId, c.city, `${c.id}: hood ${h} not in ${c.city}`);
-    }
-    if (c.scope === 'country') assert.ok(['US', 'UK'].includes(c.country), `${c.id}: unknown country`);
+    assert.ok(['hood', 'borough', 'city', 'country', 'global'].includes(c.scope), `${c.id}: unknown scope`);
+    if (c.scope === 'hood') for (const h of c.hoods) assert.ok(HOOD_BY_ID[h], `${c.id}: unknown hood ${h}`);
+    if (c.scope === 'borough') for (const b of c.boroughs) assert.ok(BOROUGH_BY_ID[b], `${c.id}: unknown borough ${b}`);
+  }
+});
+
+test('every activity has at least one New York charity, except coffee', () => {
+  for (const id of Object.keys(CATEGORY_BY_ID)) {
+    if (id === 'coffee') continue;
+    assert.ok(
+      CHARITIES.some((c) => c.category === id && ['hood', 'borough', 'city'].includes(c.scope)),
+      `${id} has no NYC charity`,
+    );
   }
 });
 

@@ -1,8 +1,8 @@
 import { CATEGORY_BY_ID } from './data/categories.js';
-import { CITIES, CITY_BY_ID, HOOD_BY_ID } from './data/places.js';
+import { BOROUGH_BY_ID, HOOD_BY_ID } from './data/places.js';
 import { analyzeYear } from './engine/classify.js';
 import { demoPosts } from './engine/demo.js';
-import { allocate, currencyFor, recommend } from './engine/match.js';
+import { allocate, recommend } from './engine/match.js';
 import { isContentFile, lastYear, parseExportFiles } from './engine/parse.js';
 import { readZip } from './engine/zip.js';
 
@@ -14,7 +14,6 @@ const state = {
   source: null, // 'demo' | 'export'
   handle: '',
   summary: null,
-  cityId: null,
   recs: [],
   selected: new Set(),
   budget: 50, // number, or 'post' for a buck a post
@@ -42,9 +41,8 @@ function show(screen) {
   window.scrollTo({ top: 0, behavior: reducedMotion ? 'auto' : 'smooth' });
 }
 
-const cur = () => currencyFor(state.cityId);
+const cur = () => '$';
 const money = (n) => `${cur()}${n.toLocaleString()}`;
-const cityName = (id) => (id ? CITY_BY_ID[id].name : 'wherever you are');
 
 // ── Getting posts in ────────────────────────────────────────────────────────
 
@@ -133,7 +131,7 @@ function scan(summary) {
 async function start({ source, handle, posts }) {
   const summary = analyzeYear(posts);
   Object.assign(state, { source, handle, summary, given: new Set() });
-  setCity(summary.homeCityId);
+  setRecommendations();
   await scan(summary);
   renderResults();
   show('results');
@@ -141,11 +139,10 @@ async function start({ source, handle, posts }) {
 
 // ── Results ─────────────────────────────────────────────────────────────────
 
-function setCity(cityId) {
-  state.cityId = cityId;
-  state.recs = recommend(state.summary, cityId);
+function setRecommendations() {
+  state.recs = recommend(state.summary);
   // Start with three picks, leaning toward the most local matches, then your biggest things.
-  const localness = { hood: 0, city: 1, country: 2, global: 3 };
+  const localness = { hood: 0, borough: 1, city: 2, nearby: 3, country: 4, global: 5 };
   const tops = state.recs.map((r, i) => ({ id: r.charities[0].id, rank: localness[r.charities[0].local], i }));
   tops.sort((a, b) => a.rank - b.rank || a.i - b.i);
   state.selected = new Set(tops.slice(0, 3).map((t) => t.id));
@@ -164,12 +161,13 @@ function renderResults() {
   $('preview-handle').textContent = `@${handle}`;
   $('range').textContent = [handle && `@${handle}`, summary.from && formatRange(summary.from, summary.to)].filter(Boolean).join(' · ');
 
-  const topHood = summary.hoods[0];
-  const turf = topHood ? HOOD_BY_ID[topHood.id].name : summary.homeCityId ? CITY_BY_ID[summary.homeCityId].name : '—';
+  const turf = summary.hoods[0] ? HOOD_BY_ID[summary.hoods[0].id].name : '—';
+  const borough = summary.boroughs[0] ? BOROUGH_BY_ID[summary.boroughs[0].id].name : '—';
   const stats = [
     [summary.totalPosts.toLocaleString(), 'posts scrubbed'],
-    [summary.matchedPosts.toLocaleString(), 'out in the world'],
+    [summary.nycPosts.toLocaleString(), 'out in the city'],
     [turf, 'home turf'],
+    [borough.replace(/^the /, 'The '), 'your borough'],
     [summary.busiestMonth != null ? MONTHS[summary.busiestMonth] : '—', 'busiest month'],
   ];
   $('stats').replaceChildren(...stats.map(([value, label]) => el('div', { class: 'stat' }, el('b', {}, value), el('span', {}, label))));
@@ -189,23 +187,9 @@ function renderResults() {
     }),
   );
 
-  renderCitySelect();
   renderPicks();
   renderBasket();
 }
-
-function renderCitySelect() {
-  const select = $('city');
-  const options = CITIES.map((c) => el('option', { value: c.id, selected: c.id === state.cityId }, c.name));
-  options.push(el('option', { value: '', selected: !state.cityId }, 'Somewhere else (national & global)'));
-  select.replaceChildren(...options);
-}
-
-$('city').addEventListener('change', (e) => {
-  setCity(e.target.value || null);
-  renderPicks();
-  renderBasket();
-});
 
 function renderPicks() {
   const container = $('picks');
@@ -219,9 +203,13 @@ function renderPicks() {
     return;
   }
 
+  const away =
+    state.summary.nycPosts === 0 &&
+    el('p', { class: 'away' }, 'Looks like most of your year happened outside the five boroughs. Here’s where New York could still use you.');
   container.replaceChildren(
+    ...(away ? [away] : []),
     ...state.recs.map((rec) => {
-      const where = rec.topHood ? ` mostly in ${HOOD_BY_ID[rec.topHood.id].name}` : state.cityId ? ` in ${cityName(state.cityId)}` : '';
+      const where = rec.topHood ? ` mostly in ${HOOD_BY_ID[rec.topHood.id].name}` : '';
       return el('article', { class: 'pick-group' },
         el('header', {},
           el('span', { class: 'pick-emoji', 'aria-hidden': 'true' }, rec.category.emoji),
@@ -381,7 +369,7 @@ function shareText(lines) {
   const total = lines.reduce((n, l) => n + l.amount, 0);
   const names = lines.map((l) => l.charity.name);
   const list = names.length > 2 ? `${names.slice(0, 2).join(', ')} & ${names.length - 2} more` : names.join(' & ');
-  return `I shared all year, so I overshared: ${money(total)} to ${list}, matched to where I actually spent my year. All your social can make an impact. #overshare`;
+  return `I shared all year, so I overshared: ${money(total)} to ${list}, matched to the NYC blocks where I actually spent my year. All your social can make an impact. #overshareNYC`;
 }
 
 function wrapLines(ctx, text, maxWidth) {
@@ -421,7 +409,7 @@ async function drawCard(lines) {
   ctx.textBaseline = 'top';
 
   ctx.font = `800 64px ${display}`;
-  ctx.fillText('overshare', pad, pad);
+  ctx.fillText('overshare nyc', pad, pad);
 
   ctx.font = `800 132px ${display}`;
   ctx.fillText('I overshared', pad, 260);
@@ -443,7 +431,7 @@ async function drawCard(lines) {
 
   const top = state.recs.slice(0, 3).map((r) => `${r.count} ${r.category.noun}`).join(' · ');
   ctx.font = `500 36px ${body}`;
-  for (const [i, text] of wrapLines(ctx, `Because my year was ${top}.`, W - pad * 2).entries()) {
+  for (const [i, text] of wrapLines(ctx, `Because my New York year was ${top}.`, W - pad * 2).entries()) {
     ctx.fillText(text, pad, Math.max(y + 40, 1020) + i * 48);
   }
 

@@ -3,8 +3,8 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Overshare</title>
-    <meta name="description" content="You shared all year, now overshare. See how all your social can make an impact." />
+    <title>Overshare NYC</title>
+    <meta name="description" content="You shared all year, now overshare. Turn your New York year into donations to the causes on your block." />
     <meta name="theme-color" content="#ff3d7f" />
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💞</text></svg>" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -14,16 +14,16 @@
   </head>
   <body>
     <header class="topbar">
-      <a class="wordmark" href="./" aria-label="Overshare home">over<span>share</span></a>
+      <a class="wordmark" href="./" aria-label="Overshare NYC home">over<span>share</span><small>NYC</small></a>
       <button class="link-btn" id="restart" hidden>Start over</button>
     </header>
 
     <main>
       <!-- 1. Landing -->
       <section class="screen hero" id="screen-start">
-        <p class="eyebrow">Make a real social impact.</p>
+        <p class="eyebrow">Make a real social impact. In all five boroughs.</p>
         <h1>You shared all year, <em>now overshare.</em></h1>
-        <p class="lede">All your social can make an impact. The brunches, the gigs, the park days — we turn your year into the causes right behind them, right where you spent it.</p>
+        <p class="lede">All your social can make an impact. The Williamsburg brunches, the Bowery gigs, the Prospect Park picnics — we turn your New York year into the causes right behind them, block by block.</p>
 
         <div class="start-card">
           <h2>See how all your social can make an impact.</h2>
@@ -60,8 +60,8 @@
         </div>
 
         <ul class="how-it-works">
-          <li><span>1</span><b>We scrub your grid.</b> Captions, hashtags and photo locations tell us where you ate, drank, danced and wandered.</li>
-          <li><span>2</span><b>We match your hoods.</b> Lots of ramen in Williamsburg? Here are the food charities working right there.</li>
+          <li><span>1</span><b>We scrub your grid.</b> Captions, hashtags and photo locations tell us where in the city you ate, drank, danced and wandered.</li>
+          <li><span>2</span><b>We match your hoods.</b> Lots of dumplings in Chinatown? Park days in Park Slope? Here are the New Yorkers working right there.</li>
           <li><span>3</span><b>You overshare.</b> Pick your causes, set a budget, give directly — every dollar goes straight to the charity.</li>
         </ul>
       </section>
@@ -82,7 +82,7 @@
 
         <header class="results-head">
           <p class="eyebrow" id="range"></p>
-          <h1 id="results-title">Your year, overshared.</h1>
+          <h1 id="results-title">Your New York year, overshared.</h1>
         </header>
 
         <div class="stats" id="stats"></div>
@@ -96,14 +96,11 @@
           <div class="picks-head">
             <div>
               <h2>All your social can make an impact.</h2>
-              <p>Causes that match what you did, where you did it. We’ve picked a few — add or swap as you like.</p>
+              <p>New York causes that match what you did, where you did it — your block first, then your borough, then the whole city. We’ve picked a few; add or swap as you like.</p>
             </div>
-            <label class="city-select">Giving in
-              <select id="city"></select>
-            </label>
           </div>
           <div id="picks"></div>
-          <p class="fineprint">Overshare isn’t affiliated with these organisations and never touches your money — you donate on each charity’s own site. Details change, so check before you give.</p>
+          <p class="fineprint">Overshare isn’t affiliated with these organizations and never touches your money — you donate on each charity’s own site. Details change, so check before you give.</p>
         </section>
       </section>
 
@@ -112,7 +109,7 @@
         <header class="results-head">
           <p class="eyebrow">Almost overshared</p>
           <h1>Now share it where it counts.</h1>
-          <p class="lede">Each link opens the charity’s own donation page. Tick them off as you go.</p>
+          <p class="lede">Each link opens the charity’s own donation page. Check them off as you go.</p>
         </header>
         <ol class="give-list" id="give-list"></ol>
         <p class="give-progress" id="give-progress"></p>
