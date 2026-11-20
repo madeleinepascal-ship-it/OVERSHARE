@@ -395,17 +395,22 @@ async function drawCard(lines) {
   const H = canvas.height;
   const total = lines.reduce((n, l) => n + l.amount, 0);
 
-  const g = ctx.createLinearGradient(0, 0, W, H);
-  g.addColorStop(0, '#ff3d7f');
-  g.addColorStop(0.55, '#ff6b4a');
-  g.addColorStop(1, '#ffb23f');
-  ctx.fillStyle = g;
+  // Dark stage with loose colour shapes, matching the site.
+  ctx.fillStyle = '#0e0c12';
   ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = '#8f73ff';
+  ctx.beginPath();
+  ctx.arc(W - 60, 180, 300, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = '#ff7a3d';
+  ctx.beginPath();
+  ctx.arc(W + 40, H - 420, 170, 0, Math.PI * 2);
+  ctx.fill();
 
   const display = '"Bricolage Grotesque", system-ui, sans-serif';
   const body = 'Inter, system-ui, sans-serif';
   const pad = 90;
-  ctx.fillStyle = '#1a0f14';
+  ctx.fillStyle = '#fbf7f2';
   ctx.textBaseline = 'top';
 
   ctx.font = `800 64px ${display}`;
@@ -413,10 +418,22 @@ async function drawCard(lines) {
 
   ctx.font = `800 132px ${display}`;
   ctx.fillText('I overshared', pad, 260);
-  ctx.fillStyle = '#fff6ee';
-  ctx.fillText(money(total), pad, 400);
 
-  ctx.fillStyle = '#1a0f14';
+  // The total sits on a tilted lime sticker.
+  const amount = money(total);
+  const aw = ctx.measureText(amount).width;
+  ctx.save();
+  ctx.translate(pad, 410);
+  ctx.rotate(-0.035);
+  ctx.fillStyle = '#d4f25c';
+  ctx.beginPath();
+  ctx.roundRect(-20, -10, aw + 40, 150, 22);
+  ctx.fill();
+  ctx.fillStyle = '#0e0c12';
+  ctx.fillText(amount, 0, 0);
+  ctx.restore();
+
+  ctx.fillStyle = '#fbf7f2';
   ctx.font = `600 44px ${body}`;
   let y = 590;
   const shown = lines.slice(0, 5);
@@ -435,6 +452,7 @@ async function drawCard(lines) {
     ctx.fillText(text, pad, Math.max(y + 40, 1020) + i * 48);
   }
 
+  ctx.fillStyle = '#ff4fa0';
   ctx.font = `800 46px ${display}`;
   ctx.fillText('You shared all year, now overshare.', pad, H - pad - 50);
 
