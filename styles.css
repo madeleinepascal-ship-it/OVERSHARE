@@ -293,6 +293,11 @@ main {
   box-shadow: 10px 10px 0 var(--lime);
 }
 
+.start-card > p {
+  font-weight: 500;
+  margin: 10px 0 22px;
+}
+
 .start-card a,
 .start-card .link-btn {
   color: var(--on-color);
