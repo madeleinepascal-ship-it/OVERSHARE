@@ -8,11 +8,11 @@
   --line: #35303d;
   --on-color: #0e0c12;
   --pink: #ff4fa0;
-  --lime: #d4f25c;
+  --yellow: #ffd23f;
   --violet: #8f73ff;
-  --orange: #ff7a3d;
+  --red: #ff3b3b;
   --cyan: #5ce1e6;
-  --good: #d4f25c;
+  --good: #ffd23f;
   --shadow: 0 10px 30px rgb(0 0 0 / 35%);
   --radius: 28px;
   --display: 'Bricolage Grotesque', system-ui, sans-serif;
@@ -65,7 +65,7 @@ h1 {
 h1 em {
   display: inline-block;
   font-style: normal;
-  background: var(--lime);
+  background: var(--yellow);
   color: var(--on-color);
   padding: 0.02em 0.16em 0.1em;
   margin-top: 0.08em;
@@ -82,7 +82,7 @@ h3 {
 }
 
 a {
-  color: var(--lime);
+  color: var(--yellow);
 }
 
 main {
@@ -129,7 +129,7 @@ main {
   margin-left: 6px;
   padding: 3px 7px 2px;
   border-radius: 6px;
-  background: var(--lime);
+  background: var(--yellow);
   color: var(--on-color);
   font-size: 0.7rem;
   letter-spacing: 0.04em;
@@ -168,8 +168,8 @@ main {
 }
 
 .btn-primary {
-  border-color: var(--lime);
-  background: var(--lime);
+  border-color: var(--yellow);
+  background: var(--yellow);
   color: var(--on-color);
 }
 
@@ -188,7 +188,7 @@ main {
 .link-btn {
   border: 0;
   background: none;
-  color: var(--lime);
+  color: var(--yellow);
   font: 700 0.95rem var(--body);
   cursor: pointer;
   padding: 4px 0;
@@ -212,8 +212,8 @@ main {
 }
 
 .chip-btn.is-active {
-  background: var(--lime);
-  border-color: var(--lime);
+  background: var(--yellow);
+  border-color: var(--yellow);
   color: var(--on-color);
 }
 
@@ -277,7 +277,7 @@ main {
   aspect-ratio: 1;
   right: clamp(80px, 24vw, 300px);
   top: clamp(180px, 22vw, 300px);
-  background: var(--orange);
+  background: var(--red);
   border-radius: 40% 60% 30% 70% / 60% 30% 70% 40%;
   transform: rotate(18deg);
 }
@@ -290,7 +290,12 @@ main {
   padding: clamp(20px, 4vw, 36px);
   max-width: 620px;
   position: relative;
-  box-shadow: 10px 10px 0 var(--lime);
+  box-shadow: 10px 10px 0 var(--yellow);
+}
+
+.start-card > p {
+  font-weight: 500;
+  margin: 10px 0 22px;
 }
 
 .start-card a,
@@ -438,7 +443,7 @@ main {
   position: relative;
   overflow: hidden;
   color: var(--on-color);
-  background: var(--lime);
+  background: var(--yellow);
   border-radius: var(--radius);
   padding: 24px 24px 28px;
   min-height: 240px;
@@ -451,7 +456,7 @@ main {
 }
 
 .how-it-works li:nth-child(3) {
-  background: var(--orange);
+  background: var(--red);
 }
 
 .how-it-works li:hover {
@@ -486,7 +491,7 @@ main {
   width: 180px;
   height: 180px;
   border-radius: 50%;
-  background: conic-gradient(var(--pink) 0 25%, var(--lime) 0 50%, var(--violet) 0 75%, var(--orange) 0);
+  background: conic-gradient(var(--pink) 0 25%, var(--yellow) 0 50%, var(--violet) 0 75%, var(--red) 0);
   animation: spin 1.6s linear infinite;
   -webkit-mask: radial-gradient(circle, transparent 52%, #000 54%);
   mask: radial-gradient(circle, transparent 52%, #000 54%);
@@ -556,7 +561,7 @@ main {
 }
 
 .stat {
-  --tile: var(--lime);
+  --tile: var(--yellow);
   background: var(--tile);
   color: var(--on-color);
   border-radius: 24px;
@@ -577,7 +582,7 @@ main {
 }
 
 .stat:nth-child(5n + 4) {
-  --tile: var(--orange);
+  --tile: var(--red);
 }
 
 .stat:nth-child(5n + 5) {
@@ -609,7 +614,7 @@ main {
 }
 
 .year-bars li {
-  --bar: var(--lime);
+  --bar: var(--yellow);
   position: relative;
   display: flex;
   align-items: center;
@@ -639,7 +644,7 @@ main {
 }
 
 .year-bars li:nth-child(5n + 4) {
-  --bar: var(--orange);
+  --bar: var(--red);
 }
 
 .year-bars li:nth-child(5n + 5) {
@@ -718,7 +723,7 @@ main {
 .pick-count {
   margin: 0 0 6px;
   font-weight: 700;
-  color: var(--lime);
+  color: var(--yellow);
 }
 
 .pick-pitch {
@@ -750,8 +755,8 @@ main {
 }
 
 .charity.is-selected {
-  border-color: var(--lime);
-  background: color-mix(in srgb, var(--lime) 12%, var(--surface));
+  border-color: var(--yellow);
+  background: color-mix(in srgb, var(--yellow) 12%, var(--surface));
 }
 
 .charity input {
@@ -760,7 +765,7 @@ main {
   top: 18px;
   width: 22px;
   height: 22px;
-  accent-color: var(--lime);
+  accent-color: var(--yellow);
 }
 
 .charity b {
@@ -893,7 +898,7 @@ main {
 .give-amount {
   font: 800 2.2rem/1 var(--display);
   letter-spacing: -0.04em;
-  color: var(--lime);
+  color: var(--yellow);
   min-width: 90px;
 }
 
@@ -961,7 +966,7 @@ main {
   }
 
   .start-card {
-    box-shadow: 6px 6px 0 var(--lime);
+    box-shadow: 6px 6px 0 var(--yellow);
   }
 
   .how-it-works li {

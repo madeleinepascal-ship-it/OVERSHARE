@@ -402,7 +402,7 @@ async function drawCard(lines) {
   ctx.beginPath();
   ctx.arc(W - 60, 180, 300, 0, Math.PI * 2);
   ctx.fill();
-  ctx.fillStyle = '#ff7a3d';
+  ctx.fillStyle = '#ff3b3b';
   ctx.beginPath();
   ctx.arc(W + 40, H - 420, 170, 0, Math.PI * 2);
   ctx.fill();
@@ -419,13 +419,13 @@ async function drawCard(lines) {
   ctx.font = `800 132px ${display}`;
   ctx.fillText('I overshared', pad, 260);
 
-  // The total sits on a tilted lime sticker.
+  // The total sits on a tilted yellow sticker.
   const amount = money(total);
   const aw = ctx.measureText(amount).width;
   ctx.save();
   ctx.translate(pad, 410);
   ctx.rotate(-0.035);
-  ctx.fillStyle = '#d4f25c';
+  ctx.fillStyle = '#ffd23f';
   ctx.beginPath();
   ctx.roundRect(-20, -10, aw + 40, 150, 22);
   ctx.fill();
