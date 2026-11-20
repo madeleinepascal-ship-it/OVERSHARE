@@ -301,6 +301,37 @@ main {
     bubble-drift 5s ease-in-out calc(2s + var(--n) * -0.37s) infinite alternate;
 }
 
+/* Every bubble is a smiley. Sized in % so faces scale with each bubble. */
+.bubbles b::before,
+.bubbles i::before,
+.bubbles b::after,
+.bubbles i::after {
+  content: '';
+  position: absolute;
+}
+
+/* Eyes: two oval dots. */
+.bubbles b::before,
+.bubbles i::before {
+  left: 29%;
+  right: 29%;
+  top: 30%;
+  height: 17%;
+  background:
+    radial-gradient(closest-side, var(--on-color) 92%, transparent) left / 22% 100% no-repeat,
+    radial-gradient(closest-side, var(--on-color) 92%, transparent) right / 22% 100% no-repeat;
+}
+
+/* Smile: the bottom half of a ring. */
+.bubbles b::after,
+.bubbles i::after {
+  left: 27%;
+  right: 27%;
+  top: 52%;
+  height: 22%;
+  background: radial-gradient(farthest-side at 50% 0, transparent 66%, var(--on-color) 69% 98%, transparent);
+}
+
 @keyframes bubble-pop {
   0%, 55% { scale: 1; }
   70% { scale: 0.94; }
